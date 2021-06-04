@@ -1,7 +1,7 @@
 version: "3.1"
 services:
   knowage:
-    image: knowagelabs/knowage-server-docker:7.4.0-SNAPSHOT
+    image: knowagelabs/knowage-server-docker:7.2
     depends_on:
       - knowagedb
     ports:
@@ -15,7 +15,6 @@ services:
       - DB_HOST_FILE=/run/secrets/knowage_db_host
       - DB_PORT_FILE=/run/secrets/knowage_db_port
       - HMAC_KEY_FILE=/run/secrets/knowage_hmac_key
-      - PASSWORD_ENCRYPTION_SECRET_FILE==/run/secrets/knowage_password_encryption_secret
       - PUBLIC_ADDRESS=localhost
     secrets:
       - knowage_db_user
@@ -26,7 +25,7 @@ services:
       - knowage_hmac_key
  
   knowagedb:
-    image: mariadb:10.3
+    image: mysql:5.7
     environment:
       - MYSQL_USER_FILE=/run/secrets/knowage_db_user
       - MYSQL_PASSWORD_FILE=/run/secrets/knowage_db_pass
@@ -62,7 +61,5 @@ secrets:
   knowage_db_root_pass:
     external: true
   knowage_hmac_key:
-    external: true
-  knowage_password_encryption_secret:
     external: true
 

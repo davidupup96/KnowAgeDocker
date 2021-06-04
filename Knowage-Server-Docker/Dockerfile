@@ -38,6 +38,7 @@ ARG KNOWAGE_CORE_ENGINE="knowage"
 ARG KNOWAGE_BIRTREPORT_ENGINE="${KNOWAGE_CORE_ENGINE}birtreportengine"
 ARG KNOWAGE_COCKPIT_ENGINE="${KNOWAGE_CORE_ENGINE}cockpitengine"
 ARG KNOWAGE_COMMONJ_ENGINE="${KNOWAGE_CORE_ENGINE}commonjengine"
+ARG KNOWAGE_DATAMINING_ENGINE="${KNOWAGE_CORE_ENGINE}dataminingengine"
 ARG KNOWAGE_GEOREPORT_ENGINE="${KNOWAGE_CORE_ENGINE}georeportengine"
 ARG KNOWAGE_JASPERREPORT_ENGINE="${KNOWAGE_CORE_ENGINE}jasperreportengine"
 ARG KNOWAGE_KPI_ENGINE="${KNOWAGE_CORE_ENGINE}kpiengine"
@@ -78,6 +79,7 @@ COPY ${KNOWAGE_CORE_ENGINE}.war \
      ${KNOWAGE_BIRTREPORT_ENGINE}.war \
      ${KNOWAGE_COCKPIT_ENGINE}.war \
      ${KNOWAGE_COMMONJ_ENGINE}.war \
+     ${KNOWAGE_DATAMINING_ENGINE}.war \
      ${KNOWAGE_GEOREPORT_ENGINE}.war \
      ${KNOWAGE_JASPERREPORT_ENGINE}.war \
      ${KNOWAGE_KPI_ENGINE}.war \
@@ -140,27 +142,20 @@ RUN  sed -i "s/bin\/sh/bin\/bash/"                   ${TOMCAT_BIN}/startup.sh \
   && sed -i "s/EXECUTABLE\" start/EXECUTABLE\" run/" ${TOMCAT_BIN}/startup.sh
 
 # Enable Security Manager
-RUN echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.security.manager -Djava.security.policy=\$CATALINA_HOME/conf/knowage-default.policy\"" >> ${TOMCAT_BIN}/setenv.sh
-
-# Memory optimization
-RUN echo "export JAVA_OPTS=\"\$JAVA_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap\"" >> ${TOMCAT_BIN}/setenv.sh
-
-# Fix permissions
-RUN chmod +x ${TOMCAT_BIN}/*
+RUN echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.security.manager -Djava.security.policy=\$CATALINA_HOME/conf/knowage-default.policy\"" >> ${TOMCAT_BIN}/setenv.sh \
+  && chmod +x ${TOMCAT_BIN}/*
 
 # Expose common tomcat port
 EXPOSE 8080
-
 
 HEALTHCHECK --start-period=120s                                          \
             --interval=10s                                               \
             --timeout=5s                                                 \
             --retries=5                                                  \
-            CMD wget -q --spider http://127.0.0.1:8080/ || exit 1
+            CMD wget -q --spider http://127.0.0.1:8080/knowage || exit 1
 
 ENTRYPOINT ["./entrypoint.sh"]
 
 VOLUME [${TOMCAT_RESOURCES}]
 
 CMD ["./apache-tomcat/bin/startup.sh"]
-

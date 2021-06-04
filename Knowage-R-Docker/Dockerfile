@@ -4,7 +4,6 @@ WORKDIR /app
 
 ARG KNOWAGE_APP_BRANCH
 
-# Depth
 RUN git clone --depth 1 --branch $KNOWAGE_APP_BRANCH https://github.com/KnowageLabs/Knowage-Server.git
 
 FROM r-base:4.0.3
@@ -15,7 +14,7 @@ COPY --from=build /app/Knowage-Server/Knowage-R .
 COPY LICENSE entrypoint.sh ./
 
 RUN apt-get update \
-	&& apt-get install --no-install-recommends -y libssl-dev file libcurl4-openssl-dev libsodium-dev \
+	&& apt-get install --no-install-recommends -y libssl-dev file \
 	&& rm -rf /var/lib/apt/lists/*
 
 # It takes too long: makes a separate layer
@@ -27,12 +26,12 @@ RUN r -e "install.packages('base64enc')" \
 
 EXPOSE 5001/tcp
 
+ENTRYPOINT [ "./entrypoint.sh" ]
+
 HEALTHCHECK --start-period=10s                                           \
-            --interval=60s                                               \
+            --interval=5s                                                \
             --timeout=5s                                                 \
             --retries=5                                                  \
             CMD wget -q -O /dev/null http://127.0.0.1:5001/dataset/libraries || exit 1
-
-ENTRYPOINT [ "./entrypoint.sh" ]
 
 CMD [ "r","knowage-r.R" ]
